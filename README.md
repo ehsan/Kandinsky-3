@@ -122,6 +122,13 @@ pip install -r requirements.txt;
 ```
 The exact dependencies is got using `pip freeze` and can be found in `exact_requirements.txt`
 
+## Training
+
+The training script `train.py` relies on a YAML configuration. To scale the U-Net
+and train larger models, adjust the `channel_multiplier` value inside your config
+(for example `configs/train.yaml`). Setting this value above `1.0` increases the
+number of channels across the network, resulting in a larger parameter count.
+
 ## How to use:
 
 Check our jupyter notebooks with examples in `./examples` folder
