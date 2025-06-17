@@ -49,12 +49,20 @@ class KandinskyLightningModule(pl.LightningModule):
         self.save_hyperparameters(OmegaConf.to_container(conf, resolve=True))
         self.conf = conf
 
-        self.unet = UNet(**conf.model.unet)
+        unet_conf = conf.model.unet
+        scale = unet_conf.get('channel_multiplier', 1.0)
+        if scale != 1.0:
+            unet_conf = unet_conf.copy()
+            unet_conf.model_channels = int(unet_conf.model_channels * scale)
+            unet_conf.init_channels = int(unet_conf.init_channels * scale)
+            unet_conf.time_embed_dim = int(unet_conf.time_embed_dim * scale)
+            unet_conf.context_dim = int(unet_conf.context_dim * scale)
+        self.unet = UNet(**unet_conf)
         self.movq = MoVQ(conf.model.movq.params)
         self.t5_processor = T5TextConditionProcessor(conf.data.tokens_length, conf.model.text_encoder.model_path)
         self.t5_encoder = T5TextConditionEncoder(
             conf.model.text_encoder.model_path,
-            conf.model.unet.context_dim,
+            unet_conf.context_dim,
             low_cpu_mem_usage=conf.model.text_encoder.low_cpu_mem_usage,
             dtype=getattr(torch, conf.model.text_encoder.dtype)
         )
