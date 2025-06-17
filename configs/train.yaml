@@ -1,0 +1,58 @@
+# Example training configuration for Kandinsky 3.0 using PyTorch Lightning
+
+model:
+  unet:
+    model_channels: 384
+    num_channels: 4
+    init_channels: 192
+    time_embed_dim: 1536
+    context_dim: 4096
+    groups: 32
+    head_dim: 64
+    expansion_ratio: 4
+    compression_ratio: 2
+    dim_mult: [1, 2, 4, 8]
+    num_blocks: [3, 3, 3, 3]
+    add_cross_attention: [false, true, true, true]
+    add_self_attention: [false, true, true, true]
+  movq:
+    params:
+      double_z: false
+      z_channels: 4
+      resolution: 256
+      in_channels: 3
+      out_ch: 3
+      ch: 256
+      ch_mult: [1, 2, 2, 4]
+      num_res_blocks: 2
+      attn_resolutions: [32]
+      dropout: 0.0
+  text_encoder:
+    model_path: google/flan-ul2
+    low_cpu_mem_usage: true
+    dtype: float32
+  diffusion:
+    schedule_params:
+      schedule_name: cosine
+      timesteps: 1000
+    diffusion_params:
+      percentile: null
+
+data:
+  dataset_name: path/to/dataset # HuggingFace dataset path or name
+  image_field: image
+  text_field: text
+  split: train
+  image_size: 256
+  tokens_length: 128
+  batch_size: 4
+  num_workers: 4
+
+optimizer:
+  lr: 1e-4
+  weight_decay: 1e-2
+
+trainer:
+  max_epochs: 1
+  accelerator: auto
+  precision: 32
